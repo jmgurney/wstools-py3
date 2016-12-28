@@ -1,6 +1,11 @@
 CHANGELOG
 ===========
 
+0.54.0 (2016-12-28)
+---------------------
+- Ran 2to3-3.5 with default settings
+- Republished python 3 version as wstools.py3
+
 0.4.1 (2013-04-18)
 ---------------------
 - Added tox for testing and disabled the tests due to broken binary assets.
