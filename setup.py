@@ -1,18 +1,18 @@
 #!/usr/bin/env python
+import codecs
 import logging
 import os
 import re
-import sys
 import subprocess
+import sys
 import warnings
-import codecs
 
+from pip.req import parse_requirements
 from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
-from pip.req import parse_requirements
 
-NAME = "wstools"
-url = "https://github.com/pycontribs/wstools.git"
+NAME = "wstools-py3"
+url = "https://github.com/Synerty/wstools-py3"
 
 # Get the version - do not use normal import because it does break coverage
 base_path = os.path.dirname(__file__)
@@ -94,8 +94,9 @@ class Release(Command):
                 "This version was already released, remove it from PyPi if you want to release it"
                 " again or increase the version number. http://pypi.python.org/pypi/%s/" % NAME)
         elif released_version > __version__:
-            raise RuntimeError("Cannot release a version (%s) smaller than the PyPI current release (%s)." % (
-                __version__, released_version))
+            raise RuntimeError(
+                "Cannot release a version (%s) smaller than the PyPI current release (%s)." % (
+                    __version__, released_version))
 
 
 class PreRelease(Command):
@@ -143,14 +144,14 @@ setup(
     license='BSD',
     description="WSDL parsing services package for Web Services for Python. see" + url,
     long_description=open("README.rst").read(),
-    maintainer="Sorin Sbarnea",
-    maintainer_email="sorin.sbarnea@gmail.com",
+    maintainer="Synerty",
+    maintainer_email="contact@synerty.com",
     author='Makina Corpus',
     author_email='python@makina-corpus.com',
     provides=[NAME],
-    url='https://github.com/pycontribs/wstools',
-    bugtrack_url='https://github.com/pycontribs/wstools/issues',
-    home_page='https://github.com/pycontribs/wstools',
+    url=url,
+    bugtrack_url='%s/issues' % url,
+    home_page=url,
     keywords='api wstools wdsl web',
     classifiers=[
         'Programming Language :: Python',
