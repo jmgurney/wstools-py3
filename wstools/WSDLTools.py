@@ -15,7 +15,7 @@ import logging
 try:
     from io import StringIO
 except ImportError:
-    from cStringIO import StringIO
+    from io import StringIO
 
 from .Namespaces import OASIS, XMLNS, WSA, WSA_LIST, WSAW_LIST, WSRF_V1_2, WSRF  # noqa
 from .Utility import Collection, CollectionNS, DOM, ElementProxy, basejoin  # noqa
@@ -364,7 +364,7 @@ class WSDL:
                 parent.appendChild(child)
                 child.setAttribute('targetNamespace', namespace)
                 attrsNS = imported._attrsNS
-                for attrkey in attrsNS.keys():
+                for attrkey in list(attrsNS.keys()):
                     if attrkey[0] == DOM.NS_XMLNS:
                         attr = attrsNS[attrkey].cloneNode(1)
                         child.setAttributeNode(attr)
@@ -1246,7 +1246,7 @@ class SoapBodyBinding:
             )
         self.encodingStyle = encodingStyle
         self.namespace = namespace
-        if type(parts) in (type(''), type(u'')):
+        if type(parts) in (type(''), type('')):
             parts = parts.split()
         self.parts = parts
         self.use = use
@@ -1673,7 +1673,7 @@ def callInfoFromWSDL(self, port, name):
                 for name in body.parts:
                     parts.append(message.parts[name])
             else:
-                parts = message.parts.values()
+                parts = list(message.parts.values())
 
             for part in parts:
                 callinfo.addInParameter(
@@ -1724,7 +1724,7 @@ def callInfoFromWSDL(self, port, name):
                 for name in body.parts:
                     parts.append(message.parts[name])
             else:
-                parts = message.parts.values()
+                parts = list(message.parts.values())
 
             if parts:
                 for part in parts:

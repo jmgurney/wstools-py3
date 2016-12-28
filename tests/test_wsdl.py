@@ -50,7 +50,7 @@ class WSDLToolsTestCase(unittest.TestCase):
         if hasattr(nameGenerator, '__next__'):
             self.path = nameGenerator.__next__()
         else:
-            self.path = nameGenerator.next()
+            self.path = next(nameGenerator)
         # print(self.path)
         sys.stdout.flush()
 
@@ -70,7 +70,7 @@ class WSDLToolsTestCase(unittest.TestCase):
         for node in DOM.getElements(definition, tag_name, nspname):
             name = DOM.getAttr(node, key)
             comp = component[name]  # noqa F841
-            self.failUnlessEqual(eval('comp.%s' % key), name)
+            self.assertEqual(eval('comp.%s' % key), name)
 
     def checkXSDCollection(self, tag_name, component, node, key='name'):
         for cnode in DOM.getElements(node, tag_name):
@@ -124,9 +124,9 @@ class WSDLToolsTestCase(unittest.TestCase):
             raise
 
         try:
-            for key in self.wsdl.types.keys():
+            for key in list(self.wsdl.types.keys()):
                 schema = self.wsdl.types[key]
-                self.failUnlessEqual(key, schema.getTargetNamespace())
+                self.assertEqual(key, schema.getTargetNamespace())
 
             definition = self.wsdl.document.documentElement
             version = DOM.WSDLUriToVersion(definition.namespaceURI)
@@ -144,9 +144,9 @@ class WSDLToolsTestCase(unittest.TestCase):
             raise
 
         if self.wsdl.extensions:
-            print('No check for WSDLTools(%s) Extensions:' % (self.wsdl.name))
+            print(('No check for WSDLTools(%s) Extensions:' % (self.wsdl.name)))
             for ext in self.wsdl.extensions:
-                print('\t', ext)
+                print(('\t', ext))
 
     def schemaAttributesDeclarations(self, schema, node):
         self.checkXSDCollection('attribute', schema.attr_decl, node)
@@ -170,7 +170,7 @@ def setUpOptions(section):
         print('fatal error:  configuration file config.txt not present')
         sys.exit(0)
     if not cp.has_section(section):
-        print('%s section not present in configuration file, exiting' % section)
+        print(('%s section not present in configuration file, exiting' % section))
         sys.exit(0)
     return cp, len(cp.options(section))
 

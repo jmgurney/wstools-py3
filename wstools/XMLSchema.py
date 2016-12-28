@@ -33,7 +33,7 @@ from .Utility import SplitQName
 from .Utility import basejoin
 
 try:
-    from StringIO import StringIO
+    from io import StringIO
 except ImportError:
     #   from io import StringIO
     from io import BytesIO as StringIO
@@ -96,7 +96,7 @@ class SchemaReader(object):
 
            schema -- XMLSchema instance
         """
-        for ns, val in schema.imports.items():
+        for ns, val in list(schema.imports.items()):
             if ns in self._imports:
                 schema.addImportSchema(self._imports[ns])
 
@@ -105,7 +105,7 @@ class SchemaReader(object):
 
            schema -- XMLSchema instance
         """
-        for schemaLocation, val in schema.includes.items():
+        for schemaLocation, val in list(schema.includes.items()):
             if schemaLocation in self._includes:
                 schema.addIncludeSchema(
                     schemaLocation, self._imports[schemaLocation])
@@ -303,12 +303,12 @@ class DOMAdapter(DOMAdapterInterface):
             if child.nodeType == ELEMENT_NODE and\
                SplitQName(child.tagName)[1] in contents:
                 nodes.append(child)
-        return map(self.__class__, nodes)
+        return list(map(self.__class__, nodes))
 
     def setAttributeDictionary(self):
         self.__attributes = {}
         if self.__node._attrs:
-            for v in self.__node._attrs.values():
+            for v in list(self.__node._attrs.values()):
                 self.__attributes[v.nodeName] = v.nodeValue
 
     def getAttributeDictionary(self):
@@ -364,7 +364,7 @@ class XMLBase:
         XMLBase.__rlock.acquire()
         XMLBase.__indent += 1
         tmp = "<" + str(self.__class__) + '>\n'
-        for k, v in self.__dict__.items():
+        for k, v in list(self.__dict__.items()):
             tmp += "%s* %s = %s\n" % (XMLBase.__indent * '  ', k, v)
         XMLBase.__indent -= 1
         XMLBase.__rlock.release()
@@ -807,7 +807,7 @@ class XMLSchemaComponent(XMLBase, MarkerInterface):
                    with QName.
         """
         self.attributes = {XMLSchemaComponent.xmlns: {}}
-        for k, v in node.getAttributeDictionary().items():
+        for k, v in list(node.getAttributeDictionary().items()):
             prefix, value = SplitQName(k)
             if value == XMLSchemaComponent.xmlns:
                 self.attributes[value][
@@ -861,7 +861,7 @@ class XMLSchemaComponent(XMLBase, MarkerInterface):
            class variable representing attribute is None, then
            it must be defined as an instance variable.
         """
-        for k, v in self.__class__.attributes.items():
+        for k, v in list(self.__class__.attributes.items()):
             if v is not None and k in self.attributes is False:
                 if isinstance(v, types.FunctionType):
                     self.attributes[k] = v(self)
@@ -878,7 +878,7 @@ class XMLSchemaComponent(XMLBase, MarkerInterface):
             if a not in self.attributes:
                 raise SchemaError(
                     'class instance %s, missing required attribute %s' % (self.__class__, a))
-        for a, v in self.attributes.items():
+        for a, v in list(self.attributes.items()):
             # attribute #other, ie. not in empty namespace
             if type(v) is dict:
                 continue
@@ -887,7 +887,7 @@ class XMLSchemaComponent(XMLBase, MarkerInterface):
             if a in (XMLSchemaComponent.xmlns, XMLNS.XML):
                 continue
 
-            if (a not in self.__class__.attributes.keys()) and not\
+            if (a not in list(self.__class__.attributes.keys())) and not\
                     (self.isAttribute() and self.isReference()):
                 raise SchemaError('%s, unknown attribute(%s, %s)' % (
                     self.getItemTrace(), a, self.attributes[a]))
@@ -1267,7 +1267,7 @@ class XMLSchema(XMLSchemaComponent):
                 self.setAttributes(pnode)
                 attributes.update(self.attributes)
                 self.setAttributes(node)
-                for k, v in attributes['xmlns'].items():
+                for k, v in list(attributes['xmlns'].items()):
                     if k not in self.attributes['xmlns']:
                         self.attributes['xmlns'][k] = v
             else:
@@ -1299,7 +1299,7 @@ class XMLSchema(XMLSchemaComponent):
                 for collection in ['imports', 'elements', 'types',
                                    'attr_decl', 'attr_groups', 'model_groups',
                                    'notations']:
-                    for k, v in getattr(schema, collection).items():
+                    for k, v in list(getattr(schema, collection).items()):
                         if k not in getattr(self, collection):
                             v._parent = weakref.ref(self)
                             getattr(self, collection)[k] = v
@@ -2049,7 +2049,7 @@ class ElementDeclaration(XMLSchemaComponent,
         parent = self
         while 1:
             nsdict = parent.attributes[XMLSchemaComponent.xmlns]
-            for k, v in nsdict.items():
+            for k, v in list(nsdict.items()):
                 if v not in SCHEMA.XSD_LIST:
                     continue
                 return TypeDescriptionComponent((v, 'anyType'))
@@ -3264,7 +3264,7 @@ class Redefine:
 if sys.version_info[:2] >= (2, 2):
     tupleClass = tuple
 else:
-    import UserTuple
+    from . import UserTuple
     tupleClass = UserTuple.UserTuple
 
 

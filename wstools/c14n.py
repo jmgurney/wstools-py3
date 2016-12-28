@@ -12,7 +12,7 @@ except ImportError:
 try:
     from io import StringIO
 except ImportError:
-    from cStringIO import StringIO
+    from io import StringIO
 
 '''XML Canonicalization
 

@@ -22,9 +22,9 @@ import six
 import socket
 import weakref
 from os.path import isfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 try:
-    from urlparse import urljoin as basejoin  # noqa
+    from urllib.parse import urljoin as basejoin  # noqa
 except ImportError:
     from urllib.parse import urljoin as basejoin  # noqa
 
@@ -40,15 +40,15 @@ from .TimeoutSocket import TimeoutSocket, TimeoutError  # noqa
 try:
     from io import StringIO
 except ImportError:
-    from cStringIO import StringIO
+    from io import StringIO
 
 try:
-    from urlparse import urlparse
+    from urllib.parse import urlparse
 except ImportError:
     from urllib.parse import urlparse
 
 try:
-    from httplib import HTTPConnection, HTTPSConnection, FakeSocket, _CS_REQ_SENT
+    from http.client import HTTPConnection, HTTPSConnection, FakeSocket, _CS_REQ_SENT
 except ImportError:
     from http.client import HTTPConnection, HTTPSConnection, _CS_REQ_SENT
     import io
@@ -219,7 +219,7 @@ def urlopen(url, timeout=20, redirects=None):
     scheme, host, path, params, query, frag = urlparse(url)
 
     if scheme not in ('http', 'https'):
-        return urllib.urlopen(url)
+        return urllib.request.urlopen(url)
     if params:
         path = '%s;%s' % (path, params)
     if query:
@@ -379,7 +379,7 @@ class DOM:
         NS_XSD_01: NS_XSI_01,
     }
 
-    for key, value in copy.deepcopy(_xsd_uri_mapping).items():
+    for key, value in list(copy.deepcopy(_xsd_uri_mapping).items()):
         _xsd_uri_mapping[value] = key
 
     def InstanceUriForSchemaUri(self, uri):
@@ -564,7 +564,7 @@ class DOM:
                 if node._attrsNS is None:
                     result = None
                 else:
-                    for item in node._attrsNS.keys():
+                    for item in list(node._attrsNS.keys()):
                         if item[1] == name:
                             result = node._attrsNS[item]
                             break
@@ -586,7 +586,7 @@ class DOM:
         """Return a Collection of all attributes
         """
         attrs = {}
-        for k, v in node._attrs.items():
+        for k, v in list(node._attrs.items()):
             attrs[k] = v.value
         return attrs
 
@@ -840,7 +840,7 @@ class ElementProxy(Base, MessageInterface):
         Base.__init__(self)
         self._dom = DOM
         self.node = None
-        if type(message) in (types.StringType, types.UnicodeType):
+        if type(message) in (bytes, str):
             self.loadFromString(message)
         elif isinstance(message, ElementProxy):
             self.node = message._getNode()
@@ -863,7 +863,7 @@ class ElementProxy(Base, MessageInterface):
             context = XPath.Context.Context(self.node,
                                             processorNss=processorNss)
         nodes = expression.evaluate(context)
-        return map(lambda node: ElementProxy(self.sw, node), nodes)
+        return [ElementProxy(self.sw, node) for node in nodes]
 
     #############################################
     # Methods for checking/setting the
@@ -943,7 +943,7 @@ class ElementProxy(Base, MessageInterface):
         if nsuri == XMLNS.XML:
             return self._xml_prefix
         if node.nodeType == Node.ELEMENT_NODE:
-            for attr in node.attributes.values():
+            for attr in list(node.attributes.values()):
                 if attr.namespaceURI == XMLNS.BASE \
                    and nsuri == attr.value:
                     return attr.localName
@@ -1041,7 +1041,7 @@ class ElementProxy(Base, MessageInterface):
         self.node = document.childNodes[0]
 
         # set up reserved namespace attributes
-        for prefix, nsuri in self.reserved_ns.items():
+        for prefix, nsuri in list(self.reserved_ns.items()):
             self._setAttributeNS(namespaceURI=self._xmlns_nsuri,
                                  qualifiedName='%s:%s' % (self._xmlns_prefix,
                                                           prefix),
@@ -1247,10 +1247,10 @@ class Collection(UserDict):
         self.data[key] = item
 
     def keys(self):
-        return map(lambda i: self._func(i), self.list)
+        return [self._func(i) for i in self.list]
 
     def items(self):
-        return map(lambda i: (self._func(i), i), self.list)
+        return [(self._func(i), i) for i in self.list]
 
     def values(self):
         return self.list
@@ -1293,13 +1293,12 @@ class CollectionNS(UserDict):
 
     def keys(self):
         keys = []
-        for tns in self.data.keys():
-            keys.append(map(lambda i: (tns, self._func(i)),
-                            self.data[tns].values()))
+        for tns in list(self.data.keys()):
+            keys.append([(tns, self._func(i)) for i in list(self.data[tns].values())])
         return keys
 
     def items(self):
-        return map(lambda i: (self._func(i), i), self.list)
+        return [(self._func(i), i) for i in self.list]
 
     def values(self):
         return self.list
@@ -1351,7 +1350,7 @@ if 1:
             else:
                 node = self.buildDocument(None, localname)
 
-        for aname, value in attrs.items():
+        for aname, value in list(attrs.items()):
             a_uri, a_localname = aname
             if a_uri == xmlns_uri:
                 if a_localname == 'xmlns':
@@ -1409,7 +1408,7 @@ if 1:
         if node.nodeType == xml.dom.minidom.Node.ELEMENT_NODE:
             clone = newOwnerDocument.createElementNS(node.namespaceURI,
                                                      node.nodeName)
-            for attr in node.attributes.values():
+            for attr in list(node.attributes.values()):
                 clone.setAttributeNS(attr.namespaceURI, attr.nodeName,
                                      attr.value)
 

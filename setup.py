@@ -84,7 +84,7 @@ class Release(Command):
         try:
             from urllib.request import urlopen
         except ImportError:
-            from urllib2 import urlopen
+            from urllib.request import urlopen
         response = urlopen(
             "http://pypi.python.org/pypi/%s/json" % NAME)
         data = json.load(codecs.getreader("utf-8")(response))
@@ -114,7 +114,7 @@ class PreRelease(Command):
         try:
             from urllib.request import urlopen
         except ImportError:
-            from urllib2 import urlopen
+            from urllib.request import urlopen
         response = urlopen(
             "http://pypi.python.org/pypi/%s/json" % NAME)
         data = json.load(codecs.getreader("utf-8")(response))
