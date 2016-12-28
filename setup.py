@@ -16,7 +16,7 @@ url = "https://github.com/Synerty/wstools-py3"
 
 # Get the version - do not use normal import because it does break coverage
 base_path = os.path.dirname(__file__)
-fp = open(os.path.join(base_path, NAME, 'version.py'))
+fp = open(os.path.join(base_path, 'wstools', 'version.py'))
 __version__ = re.compile(r".*__version__\s*=\s*['\"](.*?)['\"]",
                          re.S).match(fp.read()).group(1)
 fp.close()
@@ -148,14 +148,13 @@ setup(
     maintainer_email="contact@synerty.com",
     author='Makina Corpus',
     author_email='python@makina-corpus.com',
-    provides=[NAME],
+    provides=['wstools'],
     url=url,
     bugtrack_url='%s/issues' % url,
     home_page=url,
     keywords='api wstools wdsl web',
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Development Status :: 5 - Production/Stable',
         'Environment :: Other Environment',
