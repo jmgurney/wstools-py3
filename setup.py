@@ -7,7 +7,6 @@ import subprocess
 import sys
 import warnings
 
-from pip.req import parse_requirements
 from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
 
@@ -124,12 +123,12 @@ class PreRelease(Command):
             raise RuntimeError(
                 "Current version of the package is equal or lower than the already published ones (PyPi). Increse version to be able to pass prerelease stage.")
 
+install_requires = [ 'six' ]
 
-def get_requirements(*path):
-    req_path = os.path.join(*path)
-    reqs = parse_requirements(req_path, session=False)
-    return [str(ir.req) for ir in reqs]
-
+# The order of packages is significant, because pip processes them in the order
+# of appearance. Changing the order has an impact on the overall integration
+# process, which may cause wedges in the gate later.
+tests_require = [ 'py >= 1.4', 'hacking', 'pytest', 'pytest-cov' ]
 
 setup(
     name=NAME,
@@ -137,10 +136,12 @@ setup(
     cmdclass={'test': PyTest, 'release': Release, 'prerelease': PreRelease},
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
-    tests_require=get_requirements(base_path, 'requirements-dev.txt'),
+    tests_require=tests_require,
     setup_requires=['setuptools'],
-    install_requires=get_requirements(base_path, 'requirements.txt'),
-
+    install_requires=install_requires,
+    extras_require={
+        'testing': tests_require
+    },
     license='BSD',
     description="WSDL parsing services package for Web Services for Python. see" + url,
     long_description=open("README.rst").read(),
