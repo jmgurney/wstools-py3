@@ -31,24 +31,13 @@ echo "Setting version to $VER"
 # Update the package version
 sed -i "s;.*version.*;__version__ = '${VER}';" wstools/version.py
 
-# Upload to test pypi
-if [[ ${VER} == *"dev"* ]]; then
-    python setup.py sdist
-    git reset --hard
+# Upload to pypi
+python setup.py sdist upload
+# Reset the commit, we don't want versions in the commit
+git commit -a -m "Updated to version ${VER}"
 
-else
-    python setup.py sdist upload -r pypitest
-    # Reset the commit, we don't want versions in the commit
-    git commit -a -m "Updated to version ${VER}"
+git tag ${VER}
+git push
+git push --tags
 
-    git tag ${VER}
-    git push
-    git push --tags
-fi
-
-
-
-echo "If you're happy with this you can now run :"
-echo
-echo "python setup.py sdist upload -r pypi"
-echo
+echo "Package deployed"
