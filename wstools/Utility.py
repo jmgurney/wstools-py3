@@ -28,12 +28,8 @@ try:
 except ImportError:
     from urllib.parse import urljoin as basejoin  # noqa
 
-try:
-    from UserDict import UserDict
-    from UserDict import DictMixin  # noqa
-except ImportError:
-    from collections import UserDict
-    from collections import MutableMapping as DictMixin  # noqa
+from collections import UserDict
+from collections.abc import MutableMapping as DictMixin  # noqa
 
 from .TimeoutSocket import TimeoutSocket, TimeoutError  # noqa
 
